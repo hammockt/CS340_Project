@@ -57,6 +57,4 @@ $statement->bindValue(2, $hashedPassword, PDO::PARAM_STR);
 $statement->bindValue(3, $nickname,       PDO::PARAM_STR);
 $statement->execute();
 
-//if their was a Database error php
-
 ?>

@@ -35,7 +35,6 @@ $statement = $pdo->prepare($query);
 $statement->bindValue(1, $username, PDO::PARAM_STR);
 $statement->execute();
 $results = $statement->fetchAll();
-//should we also check if the results is greater than 1 and return HTTP(500)?
 if(count($results) != 1)
 {
 	//unknown users are unauthorized

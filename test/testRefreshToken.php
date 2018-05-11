@@ -1,4 +1,5 @@
 <?php
+require_once 'phpUtilities.php';
 require_once 'vendor/autoload.php';
 
 use Lcobucci\JWT\Parser;
@@ -28,14 +29,14 @@ class TestRefreshToken extends PHPUnit_Framework_TestCase
 	{
 		$this->assertStringMatchesFormat('%s.%s.%s', $refreshToken);
 
-		$ini = parse_ini_file('../config/rest.ini');
+		$config = loadConfig();
 
 		$token = (new Parser())->parse($refreshToken);
-		$this->assertTrue($token->verify(new Sha256(), $ini['refresh_key']));
+		$this->assertTrue($token->verify(new Sha256(), $config['refresh_key']));
 
 		$tokenValidater = new ValidationData();
-		$tokenValidater->setIssuer($ini['refresh_iss']);
-		$tokenValidater->setAudience($ini['refresh_aud']);
+		$tokenValidater->setIssuer($config['refresh_iss']);
+		$tokenValidater->setAudience($config['refresh_aud']);
 		$tokenValidater->setSubject('refresh');
 		$this->assertTrue($token->validate($tokenValidater));
 

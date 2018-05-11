@@ -6,6 +6,7 @@ header("Content-Type: application/json");
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'postUtilities.php';
+require_once 'tokenUtilities.php';
 require_once 'vendor/autoload.php';
 
 use Lcobucci\JWT\Parser;
@@ -27,29 +28,11 @@ enforceNonEmptyKeys($data, $keys);
 $refreshToken = $data['refreshToken'];
 
 //to token string into a token object
-$token = (new Parser())->parse((string) $refreshToken);
+$token = (new Parser())->parse($refreshToken);
 
 $config = loadConfig();
 
-//verify the signature
-if(!$token->verify(new Sha256(), $config['refresh_key']) || !$token->hasClaim('uid'))
-{
-	//bad tokens are forbidden
-	http_response_code(403);
-	exit();
-}
-
-//validate the token contraints. i.e token has not expired and the servers are correct
-$data = new ValidationData(); //it will use the current time to validate (iat, nbf and exp)
-$data->setIssuer($config['refresh_iss']);
-$data->setAudience($config['refresh_aud']);
-$data->setSubject('refresh');
-if(!$token->validate($data))
-{
-	//expired or non-correct credentials are unauthorized
-	http_response_code(401);
-	exit();
-}
+verifyRefreshToken($config, $token);
 
 //now create a authToken
 $authToken = (new Builder())->setIssuer($config['auth_iss'])
