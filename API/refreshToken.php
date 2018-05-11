@@ -3,14 +3,13 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json");
 
+require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'postUtilities.php';
 require_once 'vendor/autoload.php';
 
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
-
-$ini = parse_ini_file('../config/rest.ini');
 
 //make sure they are posting this endpoint
 $httpMethods = ["POST"];
@@ -26,7 +25,9 @@ enforceNonEmptyKeys($data, $keys);
 $username  = $data['username'];
 $password  = $data['password'];
 
-$pdo = new PDO($ini['db_dsn'], $ini['db_user'], $ini['db_password']);
+$config = loadConfig();
+
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
 
 //we need the password to validate the given username
 $query = "SELECT password FROM Users WHERE username = ?";
@@ -53,14 +54,14 @@ if(!password_verify($password, $hashedPassword))
 	exit();
 }
 
-$token = (new Builder())->setIssuer($ini['refresh_iss'])
-                        ->setAudience($ini['refresh_aud'])
+$token = (new Builder())->setIssuer($config['refresh_iss'])
+                        ->setAudience($config['refresh_aud'])
                         ->setId(generateRandomSalt(16))
                         ->setIssuedAt(time())
-                        ->setExpiration(time() + $ini['refresh_exp'])
+                        ->setExpiration(time() + $config['refresh_exp'])
                         ->setSubject('refresh')
                         ->set('uid', $username)
-                        ->sign(new Sha256(), $ini['refresh_key'])
+                        ->sign(new Sha256(), $config['refresh_key'])
                         ->getToken();
 
 $json = [ 'refreshToken' => "$token" ];

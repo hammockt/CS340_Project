@@ -3,10 +3,9 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json");
 
+require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'postUtilities.php';
-
-$ini = parse_ini_file('../config/rest.ini');
 
 //make sure they are posting this endpoint
 $httpMethods = ["POST"];
@@ -31,7 +30,9 @@ if(!preg_match('^(?=.{6,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[\w\W
 	exit();
 }
 
-$pdo = new PDO($ini['db_dsn'], $ini['db_user'], $ini['db_password']);
+$config = loadConfig();
+
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
 
 //check if someone already has this username
 $query = "SELECT COUNT(username) as totalCount FROM Users WHERE username = ?";
