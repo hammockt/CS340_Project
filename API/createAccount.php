@@ -24,7 +24,7 @@ $password  = $data['password'];
 $nickname  = (empty($data['nickname'])? null: $data['nickname']);
 
 //does the password meet the minimum requirements?
-if(!preg_match('^(?=.{6,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[\w\W]+', $password))
+if(!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[\W\w]{6,72}$/', $password))
 {
 	http_response_code(409);
 	exit();
