@@ -3,14 +3,13 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json");
 
+require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'postUtilities.php';
 require_once 'vendor/autoload.php';
 
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
-
-$ini = parse_ini_file('../config/rest.ini');
 
 //make sure they are posting this endpoint
 $httpMethods = ["POST"];
@@ -20,13 +19,17 @@ enforceHttpMethods($httpMethods);
 $data = getJsonFromHttpBody();
 
 //make sure that they sent us a username and password
-$keys = ['username', 'password'];
-enforceNonEmptyKeys($data, $keys);
+$requiredKeys = ['username', 'password'];
+$optionalKeys = [];
+enforceKeys($data, $requiredKeys, $optionalKeys);
+enforceNonEmptyKeys($data, $requiredKeys);
 
 $username  = $data['username'];
 $password  = $data['password'];
 
-$pdo = new PDO($ini['db_dsn'], $ini['db_user'], $ini['db_password']);
+$config = loadConfig();
+
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
 
 //we need the password to validate the given username
 $query = "SELECT password FROM Users WHERE username = ?";
@@ -34,7 +37,6 @@ $statement = $pdo->prepare($query);
 $statement->bindValue(1, $username, PDO::PARAM_STR);
 $statement->execute();
 $results = $statement->fetchAll();
-//should we also check if the results is greater than 1 and return HTTP(500)?
 if(count($results) != 1)
 {
 	//unknown users are unauthorized
@@ -53,14 +55,14 @@ if(!password_verify($password, $hashedPassword))
 	exit();
 }
 
-$token = (new Builder())->setIssuer($ini['refresh_iss'])
-                        ->setAudience($ini['refresh_aud'])
+$token = (new Builder())->setIssuer($config['refresh_iss'])
+                        ->setAudience($config['refresh_aud'])
                         ->setId(generateRandomSalt(16))
                         ->setIssuedAt(time())
-                        ->setExpiration(time() + $ini['refresh_exp'])
+                        ->setExpiration(time() + $config['refresh_exp'])
                         ->setSubject('refresh')
                         ->set('uid', $username)
-                        ->sign(new Sha256(), $ini['refresh_key'])
+                        ->sign(new Sha256(), $config['refresh_key'])
                         ->getToken();
 
 $json = [ 'refreshToken' => "$token" ];
