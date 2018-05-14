@@ -22,8 +22,10 @@ enforceHttpMethods($httpMethods);
 $data = getJsonFromHttpBody();
 
 //make sure that they sent us a refreshToken
-$keys = ['refreshToken'];
-enforceNonEmptyKeys($data, $keys);
+$requiredKeys = ['refreshToken'];
+$optionalKeys = [];
+enforceKeys($data, $requiredKeys, $optionalKeys);
+enforceNonEmptyKeys($data, $requiredKeys);
 
 $refreshToken = $data['refreshToken'];
 

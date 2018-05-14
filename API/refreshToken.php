@@ -19,8 +19,10 @@ enforceHttpMethods($httpMethods);
 $data = getJsonFromHttpBody();
 
 //make sure that they sent us a username and password
-$keys = ['username', 'password'];
-enforceNonEmptyKeys($data, $keys);
+$requiredKeys = ['username', 'password'];
+$optionalKeys = [];
+enforceKeys($data, $requiredKeys, $optionalKeys);
+enforceNonEmptyKeys($data, $requiredKeys);
 
 $username  = $data['username'];
 $password  = $data['password'];

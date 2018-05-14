@@ -12,23 +12,4 @@ function getJsonFromHttpBody()
 	return $data;
 }
 
-//checks if they exist, or have a non-empty non-zero value
-function enforceNonEmptyKeys( array $array, array $keys )
-{
-	$count = 0;
-	foreach( $keys as $key )
-	{
-		if(!empty($array[$key]))
-		{
-			$count++;
-		}
-	}
-
-	if(count($keys) !== $count)
-	{
-		http_response_code(400);
-		exit();
-	}
-}
-
 ?>

@@ -107,6 +107,33 @@ class TestRefreshToken extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals(400, $res->getStatusCode());
 	}
+
+	public function testEmptyJsonKey()
+	{
+		$data = self::goodInput();
+		$data['username'] = '';
+		$data['password'] = '';
+
+		$res = self::$client->request('POST', 'refreshToken', [
+			GuzzleHttp\RequestOptions::JSON => $data,
+			'http_errors' => false
+		]);
+
+		$this->assertEquals(400, $res->getStatusCode());
+	}
+
+	public function testAdditionalKey()
+	{
+		$data = self::goodInput();
+		$data['thisIsNotAKey'] = 'test';
+
+		$res = self::$client->request('POST', 'refreshToken', [
+			GuzzleHttp\RequestOptions::JSON => $data,
+			'http_errors' => false
+		]);
+
+		$this->assertEquals(400, $res->getStatusCode());
+	}
 }
 
 ?>
