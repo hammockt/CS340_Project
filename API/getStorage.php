@@ -28,8 +28,8 @@ $isHDD        = $_GET['isHDD'];
 validateString($formFactor);
 validateString($manufacturer);
 validateString($series);
-validateFloat($minSize);
-validateFloat($maxSize);
+validateInt($minSize);
+validateInt($maxSize);
 validateBoolean($isSSD);
 validateBoolean($isHDD);
 
@@ -44,8 +44,8 @@ $statement->bindValue(':manufacturer',  $manufacturer, PDO::PARAM_STR);
 $statement->bindValue(':series',        $series,       PDO::PARAM_STR);
 $statement->bindValue(':minSize',       $minSize,      PDO::PARAM_INT);
 $statement->bindValue(':maxSize',       $maxSize,      PDO::PARAM_INT);
-$statement->bindValue(':isSSD',         $isSSD,        PDO::PARAM_INT);
-$statement->bindValue(':isHDD',         $isHDD,        PDO::PARAM_INT);
+$statement->bindValue(':isSSD',         $isSSD);
+$statement->bindValue(':isHDD',         $isHDD);
 $statement->execute();
 
 $jsonArray = array();
