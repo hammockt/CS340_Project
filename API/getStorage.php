@@ -28,8 +28,8 @@ $isHDD        = $_GET['isHDD'];
 validateString($formFactor);
 validateString($manufacturer);
 validateString($series);
-validateInt($minSize);
-validateInt($maxSize);
+validateInteger($minSize);
+validateInteger($maxSize);
 validateBoolean($isSSD);
 validateBoolean($isHDD);
 
@@ -54,6 +54,8 @@ while($rowObject = $statement->fetchObject())
 	array_push($jsonArray, $rowObject);
 }
 
+ob_start("ob_gzhandler");
 printf("%s", json_encode($jsonArray));
+ob_end_flush();
 
 ?>
