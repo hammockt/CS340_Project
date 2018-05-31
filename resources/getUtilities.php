@@ -28,12 +28,19 @@ function validateFloat($value)
 	}
 }
 
-function validateBoolean($value)
+function validateBoolean(&$value)
 {
 	if($value !== null && $value !== '0' && $value !== '1')
 	{
-		http_response_code(400);
-		exit();
+		if($value === '')
+		{
+			$value = 1;
+		}
+		else
+		{
+			http_response_code(400);
+			exit();
+		}
 	}
 }
 
