@@ -12,54 +12,51 @@ $httpMethods = ["GET"];
 enforceHttpMethods($httpMethods);
 
 $requiredKeys = [];
-$optionalKeys = ['partID', 'formFactor', 'manufacturer', 'minSize', 'maxSize', 'isSSD', 'isHDD'];
+$optionalKeys = ['partID', 'manufacturer', 'isAir', 'isLiquid', 'minHeight', 'maxHeight'];
 enforceKeys($_GET, $requiredKeys, $optionalKeys);
 enforceNonEmptyKeys($_GET, $requiredKeys);
 
 //optional fields
 $partID       = $_GET['partID'];
-$formFactor   = $_GET['formFactor'];
 $manufacturer = $_GET['manufacturer'];
-$minSize      = $_GET['minSize'];
-$maxSize      = $_GET['maxSize'];
-$isSSD        = $_GET['isSSD'];
-$isHDD        = $_GET['isHDD'];
+$isAir        = $_GET['isAir'];
+$isLiquid     = $_GET['isLiquid'];
+$minHeight    = $_GET['minHeight'];
+$maxHeight    = $_GET['maxHeight'];
 
 validateString($partID);
-validateString($formFactor);
 validateString($manufacturer);
-validateInteger($minSize);
-validateInteger($maxSize);
-validateBoolean($isSSD);
-validateBoolean($isHDD);
+validateBoolean($isAir);
+validateBoolean($isLiquid);
+validateInteger($minHeight);
+validateInteger($maxHeight);
 
 $config = loadConfig();
 
 $pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
 
-$query = 'CALL getStorage(:partID, :formFactor, :manufacturer, :minSize, :maxSize, :isSSD, :isHDD)';
+$query = 'CALL getCPUCoolers(:partID, :manufacturer, :isAir, :isLiquid, :minHeight, :maxHeight)';
 $statement = $pdo->prepare($query);
 $statement->bindValue(':partID',        $partID,       PDO::PARAM_STR);
-$statement->bindValue(':formFactor',    $formFactor,   PDO::PARAM_STR);
 $statement->bindValue(':manufacturer',  $manufacturer, PDO::PARAM_STR);
-$statement->bindValue(':minSize',       $minSize,      PDO::PARAM_INT);
-$statement->bindValue(':maxSize',       $maxSize,      PDO::PARAM_INT);
-$statement->bindValue(':isSSD',         $isSSD,        PDO::PARAM_BOOL);
-$statement->bindValue(':isHDD',         $isHDD,        PDO::PARAM_BOOL);
+$statement->bindValue(':isAir',         $isAir,        PDO::PARAM_BOOL);
+$statement->bindValue(':isLiquid',      $isLiquid,     PDO::PARAM_BOOL);
+$statement->bindValue(':minHeight',     $minHeight,    PDO::PARAM_INT);
+$statement->bindValue(':maxHeight',     $maxHeight,    PDO::PARAM_INT);
 $statement->execute();
 
 $jsonArray = array();
 while($rowObject = $statement->fetchObject())
 {
+	$nameID = ($rowObject->model !== null)? $rowObject->model: $rowObject->partID;
+
 	$rowObject = (array)$rowObject;
-	$rowObject['name'] = "${rowObject['manufacturer']} ${rowObject['series']}";
+	$rowObject['name'] = "${rowObject['manufacturer']} $nameID";
 	$rowObject = (object)$rowObject;
 
 	array_push($jsonArray, $rowObject);
 }
 
-ob_start("ob_gzhandler");
 printf("%s", json_encode($jsonArray));
-ob_end_flush();
 
 ?>
