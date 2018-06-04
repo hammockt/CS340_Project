@@ -49,10 +49,6 @@ $jsonArray = array();
 while($rowObject = $statement->fetchObject())
 {
 	$nameID = ($rowObject->series !== null)? $rowObject->series: $rowObject->partID;
-	if($rowObject->eightyPlus !== null)
-	{
-		$rowObject->eightyPlus = ($rowObject->eightyPlus !== '')? "80+ $rowObject->eightyPlus": '80+';
-	}
 
 	$rowObject = (array)$rowObject;
 	$rowObject['name'] = "${rowObject['manufacturer']} $nameID";
