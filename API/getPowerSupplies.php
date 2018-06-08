@@ -33,7 +33,7 @@ validateInteger($maxWattage);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getPowerSupplies(:partID, :manufacturer, :modular, :eightyPlus, :minWattage, :maxWattage)';
 $statement = $pdo->prepare($query);

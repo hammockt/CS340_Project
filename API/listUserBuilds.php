@@ -28,7 +28,7 @@ $token = (new Parser())->parse($authToken);
 $config = loadConfig();
 verifyAuthToken($config, $token);
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getUsersBuilds(:username)';
 $statement = $pdo->prepare($query);

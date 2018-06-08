@@ -42,7 +42,7 @@ if($password !== null)
 	}
 }
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL updateUserProperties(:username, :password, :nickname)';
 $statement = $pdo->prepare($query);

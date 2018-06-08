@@ -29,12 +29,12 @@ $password  = $data['password'];
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 //we need the password to validate the given username
-$query = "SELECT password FROM Users WHERE username = ?";
+$query = "CALL getUserCredentials(:username)";
 $statement = $pdo->prepare($query);
-$statement->bindValue(1, $username, PDO::PARAM_STR);
+$statement->bindValue(':username', $username, PDO::PARAM_STR);
 $statement->execute();
 $results = $statement->fetchAll();
 if(count($results) != 1)

@@ -31,7 +31,7 @@ verifyAuthToken($config, $token);
 
 validateInteger($buildID);
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getBuild(:buildID)';
 $statement = $pdo->prepare($query);
@@ -41,7 +41,27 @@ $statement->execute();
 $jsonArray = array();
 while($rowObject = $statement->fetchObject())
 {
-	array_push($jsonArray, $rowObject);
+	$found = false;
+	for($i = 0; $i < count($jsonArray); $i++)
+	{
+		if($jsonArray[$i]->partType === $rowObject->partType)
+		{
+			$item = (object) [ 'partID' => $rowObject->partID, 'id' => $rowObject->id ];
+			array_push($jsonArray[$i]->ids, $item);
+			$found = true;
+			break; 
+		}
+	}
+
+	if($found === false)
+	{
+		$object = (object) [ 'partID' => $rowObject->partID, 'id' => $rowObject->id ];
+		$item = (object) [
+			'partType' => $rowObject->partType,
+			'ids' => [ $object ]
+		];
+		array_push($jsonArray, $item);
+	}
 }
 
 printf("%s", json_encode($jsonArray));

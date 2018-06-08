@@ -43,7 +43,7 @@ validateFloat($maxClockSpeed);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getCPUs(:partID, :name, :manufacturer, :socket, :family, :minCores, :maxCores, :minThreads, :maxThreads, :minClockSpeed, :maxClockSpeed)';
 $statement = $pdo->prepare($query);
