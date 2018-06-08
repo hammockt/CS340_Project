@@ -41,7 +41,7 @@ validateInteger($maxSticks);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getRAM(:partID, :manufacturer, :type, :moduleType, :minSize, :maxSize, :minSpeed, :maxSpeed, :minSticks, :maxSticks)';
 $statement = $pdo->prepare($query);

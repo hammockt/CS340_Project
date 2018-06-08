@@ -41,7 +41,7 @@ validateInteger($maxSlots);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getMotherboards(:partID, :socket, :chipset, :formFactor, :manufacturer, :ramType, :minRAM, :maxRAM, :minSlots, :maxSlots)';
 $statement = $pdo->prepare($query);

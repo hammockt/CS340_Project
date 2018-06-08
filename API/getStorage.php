@@ -35,7 +35,7 @@ validateBoolean($isHDD);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getStorage(:partID, :formFactor, :manufacturer, :minSize, :maxSize, :isSSD, :isHDD)';
 $statement = $pdo->prepare($query);

@@ -31,7 +31,7 @@ validateInteger($maxCpuClearance);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getComputerCases(:partID, :manufacturer, :type, :minCpuClearance, :maxCpuClearance)';
 $statement = $pdo->prepare($query);
@@ -46,9 +46,18 @@ $jsonArray = array();
 while($rowObject = $statement->fetchObject())
 {
 	$nameID = ($rowObject->model !== null)? $rowObject->model: $rowObject->partID;
+	/*$lengths = explode(',', $rowObject->gpuClearance);
+	$notes = explode(',', $rowObject->note);
+	$array = [];
+	for($i = 0; $i < count($lengths); $i++)
+	{
+		array_push($array, (object) [ 'length' => $lengths[$i], 'note' => $notes[$i] ]);
+	}*/
+	//$rowObject->formFactor = explode(',', $rowObject->formFactor);
 
 	$rowObject = (array)$rowObject;
 	$rowObject['name'] = "${rowObject['manufacturer']} $nameID";
+	//$rowObject['gpuClearances'] = $array;
 	$rowObject = (object)$rowObject;
 
 	array_push($jsonArray, $rowObject);

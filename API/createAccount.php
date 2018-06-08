@@ -37,7 +37,7 @@ if(!preg_match($passwordRegex, $password) || !preg_match($usernameRegex, $userna
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 //check if someone already has this username
 $query = "SELECT COUNT(username) as totalCount FROM Users WHERE username = ?";
@@ -61,5 +61,8 @@ $statement->bindValue(1, $username,       PDO::PARAM_STR);
 $statement->bindValue(2, $hashedPassword, PDO::PARAM_STR);
 $statement->bindValue(3, $nickname,       PDO::PARAM_STR);
 $statement->execute();
+
+$output = (object) [ 'affectedRows' => $statement->rowCount() ];
+printf("%s", json_encode($output));
 
 ?>

@@ -33,7 +33,7 @@ validateInteger($maxWattage);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getPowerSupplies(:partID, :manufacturer, :modular, :eightyPlus, :minWattage, :maxWattage)';
 $statement = $pdo->prepare($query);
@@ -49,10 +49,6 @@ $jsonArray = array();
 while($rowObject = $statement->fetchObject())
 {
 	$nameID = ($rowObject->series !== null)? $rowObject->series: $rowObject->partID;
-	if($rowObject->eightyPlus !== null)
-	{
-		$rowObject->eightyPlus = ($rowObject->eightyPlus !== '')? "80+ $rowObject->eightyPlus": '80+';
-	}
 
 	$rowObject = (array)$rowObject;
 	$rowObject['name'] = "${rowObject['manufacturer']} $nameID";

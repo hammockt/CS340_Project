@@ -33,7 +33,7 @@ validateInteger($maxHeight);
 
 $config = loadConfig();
 
-$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password']);
+$pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
 $query = 'CALL getCPUCoolers(:partID, :manufacturer, :isAir, :isLiquid, :minHeight, :maxHeight)';
 $statement = $pdo->prepare($query);
