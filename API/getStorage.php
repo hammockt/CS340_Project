@@ -6,6 +6,7 @@ header("Content-Type: application/json");
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'getUtilities.php';
+require_once 'partNameBLL.php';
 
 //make sure they are posting this endpoint
 $httpMethods = ["GET"];
@@ -49,13 +50,11 @@ $statement->bindValue(':isHDD',         $isHDD,        PDO::PARAM_BOOL);
 $statement->execute();
 
 $jsonArray = array();
-while($rowObject = $statement->fetchObject())
+while($row = $statement->fetch(PDO::FETCH_ASSOC))
 {
-	$rowObject = (array)$rowObject;
-	$rowObject['name'] = "${rowObject['manufacturer']} ${rowObject['series']}";
-	$rowObject = (object)$rowObject;
+	$row['name'] = getStorageName($row);
 
-	array_push($jsonArray, $rowObject);
+	array_push($jsonArray, (object)$row);
 }
 
 ob_start("ob_gzhandler");

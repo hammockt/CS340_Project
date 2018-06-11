@@ -6,6 +6,7 @@ header("Content-Type: application/json");
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'getUtilities.php';
+require_once 'partNameBLL.php';
 
 //make sure they are posting this endpoint
 $httpMethods = ["GET"];
@@ -58,15 +59,11 @@ $statement->bindValue(':maxMemory',     $maxMemory);
 $statement->execute();
 
 $jsonArray = array();
-while($rowObject = $statement->fetchObject())
+while($row = $statement->fetch(PDO::FETCH_ASSOC))
 {
-	$nameID = ($rowObject->series !== null)? $rowObject->series: $rowObject->gpuChipset;
+	$row['name'] = getGraphicsCardName($row);
 
-	$rowObject = (array)$rowObject;
-	$rowObject['name'] = "${rowObject['manufacturer']} $nameID";
-	$rowObject = (object)$rowObject;
-
-	array_push($jsonArray, $rowObject);
+	array_push($jsonArray, (object)$row);
 }
 
 printf("%s", json_encode($jsonArray));

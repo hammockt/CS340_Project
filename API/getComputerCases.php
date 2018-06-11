@@ -6,6 +6,7 @@ header("Content-Type: application/json");
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'getUtilities.php';
+require_once 'partNameBLL.php';
 
 //make sure they are posting this endpoint
 $httpMethods = ["GET"];
@@ -43,24 +44,11 @@ $statement->bindValue(':maxCpuClearance', $maxCpuClearance, PDO::PARAM_INT);
 $statement->execute();
 
 $jsonArray = array();
-while($rowObject = $statement->fetchObject())
+while($row = $statement->fetch(PDO::FETCH_ASSOC))
 {
-	$nameID = ($rowObject->model !== null)? $rowObject->model: $rowObject->partID;
-	/*$lengths = explode(',', $rowObject->gpuClearance);
-	$notes = explode(',', $rowObject->note);
-	$array = [];
-	for($i = 0; $i < count($lengths); $i++)
-	{
-		array_push($array, (object) [ 'length' => $lengths[$i], 'note' => $notes[$i] ]);
-	}*/
-	//$rowObject->formFactor = explode(',', $rowObject->formFactor);
+	$row['name'] = getCaseName($row);
 
-	$rowObject = (array)$rowObject;
-	$rowObject['name'] = "${rowObject['manufacturer']} $nameID";
-	//$rowObject['gpuClearances'] = $array;
-	$rowObject = (object)$rowObject;
-
-	array_push($jsonArray, $rowObject);
+	array_push($jsonArray, (object)$row);
 }
 
 printf("%s", json_encode($jsonArray));
