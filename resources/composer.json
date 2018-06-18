@@ -2,11 +2,5 @@
     "require": {
         "lcobucci/jwt": "^3.2",
         "guzzlehttp/guzzle": "^6.3"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^5"
-    },
-    "scripts": {
-    	"test": "./vendor/bin/phpunit"
     }
 }
