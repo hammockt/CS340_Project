@@ -15,15 +15,19 @@ class CPU implements JsonSerializable
 	public function __construct($array)
 	{
 		$this->partID = $array['partID'];
-		$this->cores = (integer)$array['cores'];
-		$this->threads = (integer)$array['threads'];
+		$this->cores = $array['cores'];
+		$this->threads = $array['threads'];
 		$this->socket = $array['socket'];
-		$this->clockSpeed = (float)$array['clockSpeed'];
+		$this->clockSpeed = $array['clockSpeed'];
 		$this->manufacturer = $array['manufacturer'];
 		$this->family = $array['family'];
 		$this->supportedChipsets = explode(',', $array['supportedChipsets']);
 
 		$this->name = $array['name'];
+
+		settype($this->cores, "integer");
+		settype($this->threads, "integer");
+		settype($this->clockSpeed, "float");
 	}
 
 	public function jsonSerialize()
