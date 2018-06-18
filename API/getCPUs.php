@@ -6,6 +6,7 @@ header("Content-Type: application/json");
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'getUtilities.php';
+require_once 'DTO/cpu.php';
 
 //make sure they are posting this endpoint
 $httpMethods = ["GET"];
@@ -61,9 +62,10 @@ $statement->bindValue(':maxClockSpeed', $maxClockSpeed);
 $statement->execute();
 
 $jsonArray = array();
-while($rowObject = $statement->fetchObject())
+while($row = $statement->fetch(PDO::FETCH_ASSOC))
 {
-	array_push($jsonArray, $rowObject);
+	$cpu = new CPU($row);
+	array_push($jsonArray, $cpu);
 }
 
 printf("%s", json_encode($jsonArray));

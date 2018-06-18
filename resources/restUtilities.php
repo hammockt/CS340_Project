@@ -3,6 +3,10 @@
 function enforceHttpMethods( array $methods )
 {
 	$requestMethod = $_SERVER["REQUEST_METHOD"];
+	if(isset($_SERVER["HTTP_X_HTTP_METHOD_OVERRIDE"]))
+	{
+		$requestMethod = $_SERVER["HTTP_X_HTTP_METHOD_OVERRIDE"];
+	}
 
 	foreach( $methods as $method )
 	{
@@ -14,6 +18,31 @@ function enforceHttpMethods( array $methods )
 
 	http_response_code(405);
 	exit();
+}
+
+function getJsonFromHttpBody()
+{
+	$data = json_decode(file_get_contents("php://input"), true);
+	if($data === NULL)
+	{
+		http_response_code(400);
+		exit();
+	}
+
+	return $data;
+}
+
+function getHttpData()
+{
+	$requestMethod = $_SERVER["REQUEST_METHOD"];
+
+	switch($requestMethod)
+	{
+		case "GET": return $_GET;
+		case "POST": return getJsonFromHttpBody();
+	}
+
+	return null;
 }
 
 function enforceKeys( array $array, array $requiredKeys, array $optionalKeys )
