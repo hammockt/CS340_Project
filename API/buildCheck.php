@@ -5,7 +5,6 @@ header("Content-Type: application/json");
 
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
-require_once 'getUtilities.php';
 
 //make sure they are using this endpoint
 $httpMethods = ["GET"];

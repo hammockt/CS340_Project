@@ -5,7 +5,6 @@ header("Content-Type: application/json");
 
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
-require_once 'getUtilities.php';
 require_once 'tokenUtilities.php';
 require_once 'partNameBLL.php';
 require_once 'vendor/autoload.php';
