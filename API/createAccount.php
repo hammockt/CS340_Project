@@ -5,7 +5,6 @@ header("Content-Type: application/json");
 
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
-require_once 'postUtilities.php';
 
 //make sure they are posting this endpoint
 $httpMethods = ["POST"];

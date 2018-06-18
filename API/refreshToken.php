@@ -5,7 +5,6 @@ header("Content-Type: application/json");
 
 require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
-require_once 'postUtilities.php';
 require_once 'vendor/autoload.php';
 
 use Lcobucci\JWT\Builder;
