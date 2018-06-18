@@ -7,6 +7,7 @@ require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'getUtilities.php';
 require_once 'tokenUtilities.php';
+require_once 'partNameBLL.php';
 require_once 'vendor/autoload.php';
 
 use Lcobucci\JWT\Parser;
@@ -33,35 +34,25 @@ validateInteger($buildID);
 
 $pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
-$query = 'CALL getBuild(:buildID)';
+$query = "CALL $procedure(:buildID)";
 $statement = $pdo->prepare($query);
 $statement->bindValue(':buildID', $buildID, PDO::PARAM_INT);
 $statement->execute();
 
 $jsonArray = array();
-while($rowObject = $statement->fetchObject())
+while($row = $statement->fetch(PDO::FETCH_ASSOC))
 {
-	$found = false;
-	for($i = 0; $i < count($jsonArray); $i++)
-	{
-		if($jsonArray[$i]->partType === $rowObject->partType)
-		{
-			$item = (object) [ 'partID' => $rowObject->partID, 'id' => $rowObject->id ];
-			array_push($jsonArray[$i]->ids, $item);
-			$found = true;
-			break; 
-		}
-	}
+	$id = $row['id'];
+	unset($row['id']);
 
-	if($found === false)
-	{
-		$object = (object) [ 'partID' => $rowObject->partID, 'id' => $rowObject->id ];
-		$item = (object) [
-			'partType' => $rowObject->partType,
-			'ids' => [ $object ]
-		];
-		array_push($jsonArray, $item);
-	}
+	$row['name'] = $nameFunction($row);
+
+	$object = (object) [
+		'id' => $id,
+		'data' => $row
+	];
+
+	array_push($jsonArray, $object);
 }
 
 printf("%s", json_encode($jsonArray));

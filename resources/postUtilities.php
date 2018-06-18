@@ -1,6 +1,6 @@
 <?php
 
-function getJsonFromHttpBody()
+/*function getJsonFromHttpBody()
 {
 	$data = json_decode(file_get_contents("php://input"), true);
 	if($data === NULL)
@@ -10,6 +10,6 @@ function getJsonFromHttpBody()
 	}
 
 	return $data;
-}
+}*/
 
 ?>
