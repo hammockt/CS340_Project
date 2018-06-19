@@ -8,10 +8,7 @@ require_once 'restUtilities.php';
 require_once 'tokenUtilities.php';
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\ValidationData;
-use Lcobucci\JWT\Builder;
+use \Firebase\JWT\JWT;
 
 //make sure they are posting this endpoint
 $httpMethods = ["POST"];
@@ -28,25 +25,25 @@ enforceNonEmptyKeys($data, $requiredKeys);
 
 $refreshToken = $data['refreshToken'];
 
-//to token string into a token object
-$token = (new Parser())->parse($refreshToken);
-
 $config = loadConfig();
 
-verifyRefreshToken($config, $token);
+$refreshTokenObject = verifyRefreshToken($config, $refreshToken);
 
 //now create a authToken
-$authToken = (new Builder())->setIssuer($config['auth_iss'])
-                            ->setAudience($config['auth_aud'])
-                            ->setId(generateRandomSalt(16))
-                            ->setIssuedAt(time())
-                            ->setExpiration(time() + $config['auth_exp'])
-                            ->setSubject('auth')
-                            ->set('uid', $token->getClaim('uid'))
-                            ->sign(new Sha256(), $config['auth_key'])
-                            ->getToken();
+$authTokenData = array(
+	'iss' => $config['auth_iss'],
+	'aud' => $config['auth_aud'],
+	'jti' => generateRandomSalt(16),
+	'iat' => time(),
+	'exp' => time() + $config['auth_exp'],
+	'sub' => 'auth',
+	'uid' => $refreshTokenObject->uid
+);
 
-$json = [ 'authToken' => "$authToken" ];
+//by default it is HS256
+$authTokenString = JWT::encode($authTokenData, $config['auth_key'], 'HS256');
+
+$json = [ 'authToken' => $authTokenString ];
 printf("%s", json_encode($json));
 
 ?>

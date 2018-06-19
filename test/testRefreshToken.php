@@ -2,9 +2,7 @@
 require_once 'phpUtilities.php';
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\ValidationData;
+use \Firebase\JWT\JWT;
 
 class TestRefreshToken extends PHPUnit_Framework_TestCase
 {
@@ -31,17 +29,12 @@ class TestRefreshToken extends PHPUnit_Framework_TestCase
 
 		$config = loadConfig();
 
-		$token = (new Parser())->parse($refreshToken);
-		$this->assertTrue($token->verify(new Sha256(), $config['refresh_key']));
-
-		$tokenValidater = new ValidationData();
-		$tokenValidater->setIssuer($config['refresh_iss']);
-		$tokenValidater->setAudience($config['refresh_aud']);
-		$tokenValidater->setSubject('refresh');
-		$this->assertTrue($token->validate($tokenValidater));
-
-		$this->assertTrue($token->hasClaim('jti'));
-		$this->assertTrue($token->hasClaim('uid'));
+		$token = JWT::decode($refreshToken, $config['refresh_key'], ['HS256']);
+		$this->assertTrue(isset($token->jti));
+		$this->assertTrue(isset($token->uid));
+		$this->assertTrue($token->iss === $config['refresh_iss']);
+		$this->assertTrue($token->aud === $config['refresh_aud']);
+		$this->assertTrue($token->sub === 'refresh');
 	}
 
 	public function testGoodInput()

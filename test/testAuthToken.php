@@ -2,9 +2,7 @@
 require_once 'phpUtilities.php';
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\ValidationData;
+use \Firebase\JWT\JWT;
 
 class TestAuthToken extends PHPUnit_Framework_TestCase
 {
@@ -39,17 +37,12 @@ class TestAuthToken extends PHPUnit_Framework_TestCase
 
 		$config = loadConfig();
 
-		$token = (new Parser())->parse($authToken);
-		$this->assertTrue($token->verify(new Sha256(), $config['auth_key']));
-
-		$tokenValidater = new ValidationData();
-		$tokenValidater->setIssuer($config['auth_iss']);
-		$tokenValidater->setAudience($config['auth_aud']);
-		$tokenValidater->setSubject('auth');
-		$this->assertTrue($token->validate($tokenValidater));
-
-		$this->assertTrue($token->hasClaim('jti'));
-		$this->assertTrue($token->hasClaim('uid'));
+		$token = JWT::decode($authToken, $config['auth_key'], ['HS256']);
+		$this->assertTrue(isset($token->jti));
+		$this->assertTrue(isset($token->uid));
+		$this->assertTrue($token->iss === $config['auth_iss']);
+		$this->assertTrue($token->aud === $config['auth_aud']);
+		$this->assertTrue($token->sub === 'auth');
 	}
 
 	public function testGoodInput()

@@ -8,8 +8,6 @@ require_once 'restUtilities.php';
 require_once 'tokenUtilities.php';
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Parser;
-
 //make sure they are getting this endpoint
 $httpMethods = ["POST"];
 enforceHttpMethods($httpMethods);
@@ -26,10 +24,8 @@ $authToken = $data['authToken'];
 $password  = $data['password'];
 $nickname  = $data['nickname'];
 
-//to token string into a token object
-$token = (new Parser())->parse($authToken);
 $config = loadConfig();
-verifyAuthToken($config, $token);
+verifyAuthToken($config, $authToken);
 
 if($password !== null)
 {

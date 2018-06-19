@@ -2,39 +2,46 @@
 
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\ValidationData;
+use \Firebase\JWT\JWT;
+use \Firebase\JWT\ExpiredException;
 
-function verifyRefreshToken( $config, $token )
+function verifyRefreshToken( $config, $tokenString )
 {
-	verifyToken($config, $token, 'refresh');
+	return verifyToken($config, $tokenString, 'refresh');
 }
 
-function verifyAuthToken( $config, $token )
+function verifyAuthToken( $config, $tokenString )
 {
-	verifyToken($config, $token, 'auth');
+	return verifyToken($config, $tokenString, 'auth');
 }
 
-function verifyToken( $config, $token, $tokenType )
+function verifyToken( $config, $tokenString, $tokenType )
 {
-	if(!$token->verify(new Sha256(), $config["{$tokenType}_key"]) || !$token->hasClaim('uid'))
+	try
+	{
+		$token = JWT::decode($tokenString, $config["{$tokenType}_key"], ['HS256']);
+	}
+	catch(ExpiredException $e)
+	{
+		//expired tokens are unauthorized
+		http_response_code(401);
+		exit();
+	}
+	catch(Exception $e)
 	{
 		//bad tokens are forbidden
 		http_response_code(403);
 		exit();
 	}
 
-	//validate the token contraints. i.e token has not expired and the servers are correct
-	$data = new ValidationData(); //it will use the current time to validate (iat, nbf and exp)
-	$data->setIssuer($config["{$tokenType}_iss"]);
-	$data->setAudience($config["{$tokenType}_aud"]);
-	$data->setSubject($tokenType);
-	if(!$token->validate($data))
+	if(!isset($token->jti) || !isset($token->uid) || $token->iss !== $config["{$tokenType}_iss"] || $token->aud !== $config["{$tokenType}_aud"] || $token->sub !== $tokenType)
 	{
-		//expired or non-correct credentials are unauthorized
-		http_response_code(401);
+		//bad tokens are forbidden
+		http_response_code(403);
 		exit();
 	}
+
+	return $token;
 }
 
 ?>

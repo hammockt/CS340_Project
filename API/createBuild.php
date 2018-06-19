@@ -8,8 +8,6 @@ require_once 'restUtilities.php';
 require_once 'tokenUtilities.php';
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Parser;
-
 //make sure they are getting this endpoint
 $httpMethods = ["POST"];
 enforceHttpMethods($httpMethods);
@@ -25,10 +23,8 @@ enforceNonEmptyKeys($data, $requiredKeys);
 $authToken = $data['authToken'];
 $buildName = $data['buildName'];
 
-//to token string into a token object
-$token = (new Parser())->parse($authToken);
 $config = loadConfig();
-verifyAuthToken($config, $token);
+verifyAuthToken($config, $authToken);
 
 $pdo = new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 

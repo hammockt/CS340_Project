@@ -7,8 +7,7 @@ require_once 'phpUtilities.php';
 require_once 'restUtilities.php';
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Builder;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
+use \Firebase\JWT\JWT;
 
 //make sure they are posting this endpoint
 $httpMethods = ["POST"];
@@ -54,17 +53,21 @@ if(!password_verify($password, $hashedPassword))
 	exit();
 }
 
-$token = (new Builder())->setIssuer($config['refresh_iss'])
-                        ->setAudience($config['refresh_aud'])
-                        ->setId(generateRandomSalt(16))
-                        ->setIssuedAt(time())
-                        ->setExpiration(time() + $config['refresh_exp'])
-                        ->setSubject('refresh')
-                        ->set('uid', $username)
-                        ->sign(new Sha256(), $config['refresh_key'])
-                        ->getToken();
+//make the refreshToken
+$tokenData = array(
+	'iss' => $config['refresh_iss'],
+	'aud' => $config['refresh_aud'],
+	'jti' => generateRandomSalt(16),
+	'iat' => time(),
+	'exp' => time() + $config['refresh_exp'],
+	'sub' => 'refresh',
+	'uid' => $username
+);
 
-$json = [ 'refreshToken' => "$token" ];
+//by default it is HS256
+$tokenString = JWT::encode($tokenData, $config['refresh_key'], 'HS256');
+
+$json = [ 'refreshToken' => $tokenString ];
 printf("%s", json_encode($json));
 
 ?>

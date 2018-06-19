@@ -9,8 +9,6 @@ require_once 'tokenUtilities.php';
 require_once 'partNameBLL.php';
 require_once 'vendor/autoload.php';
 
-use Lcobucci\JWT\Parser;
-
 //make sure they are getting this endpoint
 $httpMethods = ["GET"];
 enforceHttpMethods($httpMethods);
@@ -24,10 +22,8 @@ enforceNonEmptyKeys($_GET, $requiredKeys);
 $authToken = $_GET['authToken'];
 $buildID = $_GET['buildID'];
 
-//to token string into a token object
-$token = (new Parser())->parse($authToken);
 $config = loadConfig();
-verifyAuthToken($config, $token);
+verifyAuthToken($config, $authToken);
 
 validateInteger($buildID);
 
