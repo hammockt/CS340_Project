@@ -1,7 +1,7 @@
 <?php
 require_once 'vendor/autoload.php';
 
-class TestGetCPUs extends PHPUnit_Framework_TestCase
+class Testcpus extends PHPUnit_Framework_TestCase
 {
 	private static $client;
 	private static $partID = 'BX80684I78700K';
@@ -20,7 +20,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testPlainCall()
 	{
-		$res = self::$client->request('GET', 'getCPUs', [
+		$res = self::$client->request('GET', 'cpus', [
 			'http_errors' => false
 		]);
 
@@ -43,7 +43,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testBadHttpMethod()
 	{
-		$res = self::$client->request('POST', 'getCPUs', [
+		$res = self::$client->request('POST', 'cpus', [
 			'http_errors' => false
 		]);
 
@@ -52,7 +52,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testBadOptionalKey()
 	{
-		$res = self::$client->request('GET', 'getCPUs?thisIsABadKey=test', [
+		$res = self::$client->request('GET', 'cpus?thisIsABadKey=test', [
 			'http_errors' => false
 		]);
 
@@ -61,7 +61,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testSearchPartID()
 	{
-		$res = self::$client->request('GET', 'getCPUs?partID=' . self::$partID, [
+		$res = self::$client->request('GET', 'cpus?partID=' . self::$partID, [
 			'http_errors' => false
 		]);
 
@@ -76,7 +76,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testSearchName()
 	{
-		$res = self::$client->request('GET', 'getCPUs?name=' . self::$name, [
+		$res = self::$client->request('GET', 'cpus?name=' . self::$name, [
 			'http_errors' => false
 		]);
 
@@ -91,7 +91,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testSearchManufacturer()
 	{
-		$res = self::$client->request('GET', 'getCPUs?manufacturer=' . self::$manufacturer, [
+		$res = self::$client->request('GET', 'cpus?manufacturer=' . self::$manufacturer, [
 			'http_errors' => false
 		]);
 
@@ -106,7 +106,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testSearchSocket()
 	{
-		$res = self::$client->request('GET', 'getCPUs?socket=' . self::$socket, [
+		$res = self::$client->request('GET', 'cpus?socket=' . self::$socket, [
 			'http_errors' => false
 		]);
 
@@ -121,7 +121,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testSearchFamily()
 	{
-		$res = self::$client->request('GET', 'getCPUs?family=' . self::$family, [
+		$res = self::$client->request('GET', 'cpus?family=' . self::$family, [
 			'http_errors' => false
 		]);
 
@@ -136,7 +136,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testMinCores()
 	{
-		$res = self::$client->request('GET', 'getCPUs?minCores=' . self::$cores, [
+		$res = self::$client->request('GET', 'cpus?minCores=' . self::$cores, [
 			'http_errors' => false
 		]);
 
@@ -154,7 +154,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testMaxCores()
 	{
-		$res = self::$client->request('GET', 'getCPUs?maxCores=' . self::$cores, [
+		$res = self::$client->request('GET', 'cpus?maxCores=' . self::$cores, [
 			'http_errors' => false
 		]);
 
@@ -172,7 +172,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testMinThreads()
 	{
-		$res = self::$client->request('GET', 'getCPUs?minThreads=' . self::$threads, [
+		$res = self::$client->request('GET', 'cpus?minThreads=' . self::$threads, [
 			'http_errors' => false
 		]);
 
@@ -190,7 +190,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testMaxThreads()
 	{
-		$res = self::$client->request('GET', 'getCPUs?maxThreads=' . self::$threads, [
+		$res = self::$client->request('GET', 'cpus?maxThreads=' . self::$threads, [
 			'http_errors' => false
 		]);
 
@@ -208,7 +208,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testMinClockSpeed()
 	{
-		$res = self::$client->request('GET', 'getCPUs?minClockSpeed=' . self::$clockSpeed, [
+		$res = self::$client->request('GET', 'cpus?minClockSpeed=' . self::$clockSpeed, [
 			'http_errors' => false
 		]);
 
@@ -226,7 +226,7 @@ class TestGetCPUs extends PHPUnit_Framework_TestCase
 
 	public function testMaxClockSpeed()
 	{
-		$res = self::$client->request('GET', 'getCPUs?maxClockSpeed=' . self::$clockSpeed, [
+		$res = self::$client->request('GET', 'cpus?maxClockSpeed=' . self::$clockSpeed, [
 			'http_errors' => false
 		]);
 

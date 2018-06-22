@@ -1,2 +1,14 @@
 SSLRequireSSL
 php_value include_path ".:/nfs/stak/users/hammockt/public_html/cs340/Project/Dev/resources"
+
+RewriteEngine On
+
+# Some hosts may require you to use the `RewriteBase` directive.
+# If you need to use the `RewriteBase` directive, it should be the
+# absolute physical path to the directory that contains this htaccess file.
+#
+RewriteBase /~hammockt/cs340/Project/Dev/API/
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]

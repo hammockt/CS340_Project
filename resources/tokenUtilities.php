@@ -21,23 +21,17 @@ function verifyToken( $config, $tokenString, $tokenType )
 	{
 		$token = JWT::decode($tokenString, $config["{$tokenType}_key"], ['HS256']);
 	}
-	catch(ExpiredException $e)
+	catch(Exception $e)
 	{
 		//expired tokens are unauthorized
 		http_response_code(401);
 		exit();
 	}
-	catch(Exception $e)
-	{
-		//bad tokens are forbidden
-		http_response_code(403);
-		exit();
-	}
 
 	if(!isset($token->jti) || !isset($token->uid) || $token->iss !== $config["{$tokenType}_iss"] || $token->aud !== $config["{$tokenType}_aud"] || $token->sub !== $tokenType)
 	{
-		//bad tokens are forbidden
-		http_response_code(403);
+		//bad tokens are unauthorized
+		http_response_code(401);
 		exit();
 	}
 

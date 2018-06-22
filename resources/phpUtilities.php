@@ -1,5 +1,9 @@
 <?php
 
+require_once 'vendor/autoload.php';
+
+//use Resources\TypedInput;
+
 function generateRandomSalt( $numChar )
 {
 	//one base64 char repersents 6bits, there are 8bits in a byte
@@ -12,48 +16,48 @@ function loadConfig()
 	return parse_ini_file('../config/rest.ini');
 }
 
-function validateInteger($value)
+function connectToDatabase()
 {
-	//if not null and not a valid integer then error
-	if($value !== null && strval($value) != strval(intval($value)))
-	{
-		http_response_code(400);
-		exit();
-	}
+	$config = loadConfig();
+
+	return new PDO($config['db_dsn'], $config['db_user'], $config['db_password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 }
 
-function validateString($value)
+function enforceKeys( array $input, array $inputKeys )
 {
-	if($value !== null && strval($value) != strval($value))
-	{
-		http_response_code(400);
-		exit();
-	}
-}
+	$requiredCount = 0;
+	foreach($inputKeys as $object)
+		if($object->isRequired)
+			$requiredCount++;
 
-function validateFloat($value)
-{
-	if($value !== null && strval($value) != strval(floatval($value)))
+	$count = 0;
+	foreach($input as $key => $value)
 	{
-		http_response_code(400);
-		exit();
-	}
-}
+		$typedInput = $inputKeys[$key];
 
-function validateBoolean(&$value)
-{
-	if($value !== null && $value !== '0' && $value !== '1')
-	{
-		if($value === '')
-		{
-			$value = 1;
-		}
-		else
+		if($typedInput === null)
 		{
 			http_response_code(400);
 			exit();
 		}
+
+		$typedInput->validate($value);
+
+		if($typedInput->isRequiredKey)
+			$count++;
 	}
+
+	if($requiredCount !== $count)
+	{
+		http_response_code(400);
+		exit();
+	}
+}
+
+function passInputKeys(array $input, array $inputKeys, $pdoStatement)
+{
+	foreach($inputKeys as $key => $typedInput)
+		$pdoStatement->bindValue(":$key", $input[$key], $typedInput->pdoDataType());
 }
 
 ?>
