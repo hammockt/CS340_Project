@@ -43,7 +43,7 @@ function enforceKeys( array $input, array $inputKeys )
 
 		$typedInput->validate($value);
 
-		if($typedInput->isRequiredKey)
+		if($typedInput->isRequired)
 			$count++;
 	}
 

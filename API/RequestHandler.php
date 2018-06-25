@@ -10,6 +10,8 @@ abstract class RequestHandler
 	public function __invoke($request, $response, $args)
 	{
 		$input = ($request->getMethod() === 'GET')? $request->getQueryParams(): $request->getParsedBody();
+		foreach($args as $key => $value)
+			$input[$key] = $value;
 
 		return $this->processRequest($request, $response, $input);
 	}

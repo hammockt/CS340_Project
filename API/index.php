@@ -1,11 +1,16 @@
 <?php
 namespace API;
 
+//ini_set("log_errors", 1);
+//ini_set('error_log','demo_errors.log');
+//ini_set('display_errors',1);
+//error_reporting(E_ALL);
+
 require_once 'vendor/autoload.php';
 
 $app = new \Slim\App();
 
-//later on should add group middleware for token authorization
+//middleware to automatically handle generic headers
 $app->add(function($request, $response, $next)
 {
 	$method = $request->getMethod();
@@ -37,6 +42,10 @@ $app->add(function($request, $response, $next)
 });
 
 $app->get('/cpus', '\API\CPUFilter');
+$app->post('/token', '\API\TokenHandler');
+$app->get('/build', '\API\BuildHandler');
+//build/{buildID} gets all of the parts in a build
+//build/{buildID}/cpus gets all of the cpu parts
 
 $app->run();
 

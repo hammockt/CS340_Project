@@ -12,3 +12,7 @@ RewriteBase /~hammockt/cs340/Project/Dev/API/
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [QSA,L]
+
+# apache2 as FastCGI cannot recognize the Authorization header, we gonna hack it back in
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
