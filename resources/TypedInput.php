@@ -1,53 +1,6 @@
 <?php
 namespace Resources;
 
-function validateInteger($value)
-{
-	//if not null and not a valid integer then error
-	if($value !== null && strval($value) != strval(intval($value)))
-	{
-		http_response_code(400);
-		exit();
-	}
-}
-
-function validateString($value)
-{
-	if($value !== null && strval($value) != strval($value))
-	{
-		http_response_code(400);
-		exit();
-	}
-}
-
-function validateFloat($value)
-{
-	if($value !== null && strval($value) != strval(floatval($value)))
-	{
-		http_response_code(400);
-		exit();
-	}
-}
-
-//pass by reference should be refactored later
-function validateBoolean(&$value)
-{
-	if($value !== null && $value !== '0' && $value !== '1')
-	{
-		if($value === '')
-		{
-			$value = 1;
-		}
-		else
-		{
-			http_response_code(400);
-			exit();
-		}
-	}
-}
-
-use \PDO;
-
 class TypedInput
 {
 	public $type;
@@ -63,22 +16,39 @@ class TypedInput
 	{
 		switch($this->type)
 		{
-			case 'integer': return validateInteger($value);
-			case 'string': return validateString($value);
-			case 'float': return validateFloat($value);
-			case 'boolean': return validateBoolean($value);
+			case 'integer': return $this->validateInteger($value);
+			case 'string':  return $this->validateString($value);
+			case 'float':   return $this->validateFloat($value);
+			case 'boolean': return $this->validateBoolean($value);
 		}
 	}
 
-	public function pdoDataType()
+	private function validateInteger($value)
 	{
-		switch($this->type)
+		//if it is null or a valid interger then return true
+		return $value === null || strval($value) == strval(intval($value));
+	}
+
+	private function validateString($value)
+	{
+		return $value === null || is_string($value);
+	}
+
+	private function validateFloat($value)
+	{
+		return $value === null || strval($value) == strval(floatval($value));
+	}
+
+	//pass by reference should be refactored later
+	private function validateBoolean(&$value)
+	{
+		if($value === '')
 		{
-			case 'integer': return PDO::PARAM_INT;
-			case 'string': return PDO::PARAM_STR;
-			case 'boolean': return PDO::PARAM_BOOL;
-			default: return PDO::PARAM_STR;
+			$value = '1';
+			return true;
 		}
+
+		return $value === null || $value === '0' || $value === '1';
 	}
 }
 
