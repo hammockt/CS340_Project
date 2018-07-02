@@ -5,10 +5,11 @@
         "firebase/php-jwt": "^5.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5"
+        "phpunit/phpunit": "^5",
+        "brianium/paratest": "^0.15.0"
     },
     "scripts": {
-    	"test": "./vendor/bin/phpunit"
+    	"test": "./vendor/bin/paratest -p8 -f"
     },
     "autoload": {
     	"psr-4": {

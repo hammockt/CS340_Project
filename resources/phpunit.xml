@@ -3,8 +3,6 @@
 	<testsuites>
 		<testsuite name="REST API Test Suite">
 			<directory suffix=".php">../test/</directory>
-			<exclude>../test/getAuthToken.php</exclude>
-			<exclude>../test/getRefreshToken.php</exclude>
 		</testsuite>
 	</testsuites>
 </phpunit>
