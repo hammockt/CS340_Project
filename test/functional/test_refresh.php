@@ -1,131 +1,60 @@
 <?php
-require_once 'phpUtilities.php';
 require_once 'vendor/autoload.php';
 
-use \Firebase\JWT\JWT;
-
-class TestRefreshToken extends PHPUnit_Framework_TestCase
+class TestRefresh extends PHPUnit_Framework_TestCase
 {
 	private static $client;
-	
-	public static function goodInput()
-	{
-		$data = [
-			'username' => 'test@testing.com',
-			'password' => 'test'
-		];
-
-		return $data;
-	}
+	private static $request;
+	private static $username = 'test@testing.com';
 
 	public static function setUpBeforeClass()
 	{
-		self::$client = new GuzzleHttp\Client(['base_uri' => 'https://web.engr.oregonstate.edu/~hammockt/cs340/Project/Dev/API/']);
+		$refreshToken = API\TokenHandler::encodeRefreshToken(self::$username);
+
+		$requestOptions =
+		[
+			'Authorization' => "Bearer $refreshToken",
+			'Content-Type' => 'application/x-www-form-urlencoded'
+		];
+
+		self::$client = new GuzzleHttp\Client([ 'http_errors' => false ]);
+		self::$request = new GuzzleHttp\Psr7\Request('POST', 'https://web.engr.oregonstate.edu/~hammockt/cs340/Project/Dev/API/token/refresh', $requestOptions);
 	}
 
-	public function verifyToken( $refreshToken )
+	public function testExpiredToken()
 	{
-		$this->assertStringMatchesFormat('%s.%s.%s', $refreshToken);
+		$expiredRefresh = API\TokenHandler::encodeRefreshToken(self::$username, time() - 10, time() - 5);
 
-		$config = loadConfig();
+		$tempRequest = GuzzleHttp\Psr7\modify_request(self::$request, ['set_headers' => ['Authorization' => "Bearer $expiredRefresh"]]);
+		$res = self::$client->send($tempRequest);
 
-		$token = JWT::decode($refreshToken, $config['refresh_key'], ['HS256']);
-		$this->assertTrue(isset($token->jti));
-		$this->assertTrue(isset($token->uid));
-		$this->assertTrue($token->iss === $config['refresh_iss']);
-		$this->assertTrue($token->aud === $config['refresh_aud']);
-		$this->assertTrue($token->sub === 'refresh');
+		$this->assertEquals(401, $res->getStatusCode());
 	}
 
-	public function testGoodInput()
+	public function testWrongToken()
 	{
-		$res = self::$client->request('POST', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => self::goodInput(),
-			'http_errors' => false
-		]);
+		$wrongToken = API\TokenHandler::encodeAuthToken(self::$username);
+
+		$tempRequest = GuzzleHttp\Psr7\modify_request(self::$request, ['set_headers' => ['Authorization' => "Bearer $wrongToken"]]);
+		$res = self::$client->send($tempRequest);
+
+		$this->assertEquals(401, $res->getStatusCode());
+	}
+
+	public function testGoodCall()
+	{
+		$res = self::$client->send(self::$request);
 
 		$this->assertEquals(200, $res->getStatusCode());
 
 		$json = json_decode($res->getBody());
-		$this->verifyToken($json->refreshToken);
-	}
+		$this->assertTrue(is_object($json));
 
-	public function testBadHttpMethod()
-	{
-		$res = self::$client->request('GET', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => self::goodInput(),
-			'http_errors' => false
-		]);
+		$this->assertTrue(property_exists($json, 'authToken'));
 
-		$this->assertEquals(405, $res->getStatusCode());
-	}
+		$this->assertStringMatchesFormat('%s.%s.%s', $json->authToken);
 
-	public function testBadPassword()
-	{
-		$data = self::goodInput();
-		$data['password'] = 'thisWillClearlyNotWork';
-
-		$res = self::$client->request('POST', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => $data,
-			'http_errors' => false
-		]);
-
-		$this->assertEquals(401, $res->getStatusCode());
-	}
-
-	public function testBadUsername()
-	{
-		$data = self::goodInput();
-		$data['username'] = 'thisWillClearlyNotWork';
-
-		$res = self::$client->request('POST', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => $data,
-			'http_errors' => false
-		]);
-
-		$this->assertEquals(401, $res->getStatusCode());
-	}
-
-	public function testIncorrectJsonKeys()
-	{
-		$data = [
-			'u' => 'bad',
-			'p' => 'especiallyBad'
-		];
-
-		$res = self::$client->request('POST', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => $data,
-			'http_errors' => false
-		]);
-
-		$this->assertEquals(400, $res->getStatusCode());
-	}
-
-	public function testEmptyJsonKey()
-	{
-		$data = self::goodInput();
-		$data['username'] = '';
-		$data['password'] = '';
-
-		$res = self::$client->request('POST', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => $data,
-			'http_errors' => false
-		]);
-
-		$this->assertEquals(400, $res->getStatusCode());
-	}
-
-	public function testAdditionalKey()
-	{
-		$data = self::goodInput();
-		$data['thisIsNotAKey'] = 'test';
-
-		$res = self::$client->request('POST', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => $data,
-			'http_errors' => false
-		]);
-
-		$this->assertEquals(400, $res->getStatusCode());
+		$this->assertNotNull(API\TokenHandler::verifyToken($json->authToken, 'auth'));
 	}
 }
 

@@ -1,74 +1,74 @@
 <?php
-require_once 'phpUtilities.php';
 require_once 'vendor/autoload.php';
 
-use \Firebase\JWT\JWT;
-
-class TestAuthToken extends PHPUnit_Framework_TestCase
+class TestValidate extends PHPUnit_Framework_TestCase
 {
 	private static $client;
-	private static $refreshTokenJsonObject;
-
-	public static function goodInput()
-	{
-		$data = [
-			'username' => 'test@testing.com',
-			'password' => 'test'
-		];
-
-		return $data;
-	}
+	private static $request;
+	private static $username = 'test@testing.com';
 
 	public static function setUpBeforeClass()
 	{
-		self::$client = new GuzzleHttp\Client(['base_uri' => 'https://web.engr.oregonstate.edu/~hammockt/cs340/Project/Dev/API/']);
+		$authToken = API\TokenHandler::encodeAuthToken(self::$username);
 
-		$res = self::$client->request('POST', 'refreshToken', [
-			GuzzleHttp\RequestOptions::JSON => self::goodInput(),
-			'http_errors' => false
-		]);
+		$requestOptions =
+		[
+			'Authorization' => "Bearer $authToken",
+			'Content-Type' => 'application/x-www-form-urlencoded'
+		];
 
-		self::$refreshTokenJsonObject = json_decode($res->getBody());
+		self::$client = new GuzzleHttp\Client([ 'http_errors' => false ]);
+		self::$request = new GuzzleHttp\Psr7\Request('POST', 'https://web.engr.oregonstate.edu/~hammockt/cs340/Project/Dev/API/token/validate', $requestOptions);
 	}
 
-	public function verifyToken( $authToken )
+	public function testNoBearer()
 	{
-		$this->assertStringMatchesFormat('%s.%s.%s', $authToken);
+		$tempRequest = GuzzleHttp\Psr7\modify_request(self::$request, ['set_headers' => ['Authorization' => 'Basic ' . base64_encode(self::$username.':test')]]);
+		$res = self::$client->send($tempRequest);
 
-		$config = loadConfig();
-
-		$token = JWT::decode($authToken, $config['auth_key'], ['HS256']);
-		$this->assertTrue(isset($token->jti));
-		$this->assertTrue(isset($token->uid));
-		$this->assertTrue($token->iss === $config['auth_iss']);
-		$this->assertTrue($token->aud === $config['auth_aud']);
-		$this->assertTrue($token->sub === 'auth');
+		$this->assertEquals(403, $res->getStatusCode());
 	}
 
-	public function testGoodInput()
+	public function testBadBearer()
 	{
-		$res = self::$client->request('POST', 'authToken', [
-			GuzzleHttp\RequestOptions::JSON => self::$refreshTokenJsonObject,
-			'http_errors' => false
-		]);
+		$tempRequest = GuzzleHttp\Psr7\modify_request(self::$request, ['set_headers' => ['Authorization' => 'Bearer notAToken']]);
+		$res = self::$client->send($tempRequest);
+
+		$this->assertEquals(401, $res->getStatusCode());
+	}
+
+	public function testExpiredToken()
+	{
+		$expiredAuth = API\TokenHandler::encodeAuthToken(self::$username, time() - 10, time() - 5);
+
+		$tempRequest = GuzzleHttp\Psr7\modify_request(self::$request, ['set_headers' => ['Authorization' => "Bearer $expiredAuth"]]);
+		$res = self::$client->send($tempRequest);
+
+		$this->assertEquals(401, $res->getStatusCode());
+	}
+
+	public function testWrongToken()
+	{
+		$wrongToken = API\TokenHandler::encodeRefreshToken(self::$username);
+
+		$tempRequest = GuzzleHttp\Psr7\modify_request(self::$request, ['set_headers' => ['Authorization' => "Bearer $wrongToken"]]);
+		$res = self::$client->send($tempRequest);
+
+		$this->assertEquals(401, $res->getStatusCode());
+	}
+
+	public function testGoodCall()
+	{
+		$res = self::$client->send(self::$request);
 
 		$this->assertEquals(200, $res->getStatusCode());
 
 		$json = json_decode($res->getBody());
-		$this->verifyToken($json->authToken);
-	}
+		$this->assertTrue(is_object($json));
 
-	public function testTamperedToken()
-	{
-		$tmpToken = self::$refreshTokenJsonObject;
-		$tmpToken->refreshToken = $tmpToken->refreshToken . 'weAreTampering';
-
-		$res = self::$client->request('POST', 'authToken', [
-			GuzzleHttp\RequestOptions::JSON => $tmpToken,
-			'http_errors' => false
-		]);
-
-		$this->assertEquals(403, $res->getStatusCode());
+		$this->assertTrue(property_exists($json, 'username'));
+		$this->assertEquals(self::$username, $json->username);
 	}
 }
+
 ?>

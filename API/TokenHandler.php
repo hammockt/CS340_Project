@@ -8,15 +8,19 @@ use \Firebase\JWT\JWT;
 
 class TokenHandler
 {
-	public static function encodeRefreshToken($username)
+	public static function encodeRefreshToken($username, $madeAt = null, $expiresAt = null)
 	{
 		$config = loadConfig();
-		$tokenData = array(
+		if($madeAt === null)    $madeAt    = time();
+		if($expiresAt === null) $expiresAt = time() + $config['refresh_exp'];
+
+		$tokenData = array
+		(
 			'iss' => $config['refresh_iss'],
 			'aud' => $config['refresh_aud'],
 			'jti' => generateRandomSalt(16),
-			'iat' => time(),
-			'exp' => time() + $config['refresh_exp'],
+			'iat' => $madeAt,
+			'exp' => $expiresAt,
 			'sub' => 'refresh',
 			'uid' => $username
 		);
@@ -24,15 +28,19 @@ class TokenHandler
 		return JWT::encode($tokenData, $config['refresh_key'], 'HS256');
 	}
 
-	public static function encodeAuthToken($username)
+	public static function encodeAuthToken($username, $madeAt = null, $expiresAt = null)
 	{
 		$config = loadConfig();
-		$tokenData = array(
+		if($madeAt === null)    $madeAt    = time();
+		if($expiresAt === null) $expiresAt = time() + $config['auth_exp'];
+
+		$tokenData = array
+		(
 			'iss' => $config['auth_iss'],
 			'aud' => $config['auth_aud'],
 			'jti' => generateRandomSalt(16),
-			'iat' => time(),
-			'exp' => time() + $config['auth_exp'],
+			'iat' => $madeAt,
+			'exp' => $expiresAt,
 			'sub' => 'auth',
 			'uid' => $username
 		);

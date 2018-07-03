@@ -43,10 +43,8 @@ class TestAuthorize extends PHPUnit_Framework_TestCase
 
 	public function testGoodCall()
 	{
-		var_dump(self::$request->getHeaders());
 		$res = self::$client->send(self::$request);
 
-		echo $res->getBody();
 		$this->assertEquals(200, $res->getStatusCode());
 
 		$json = json_decode($res->getBody());
